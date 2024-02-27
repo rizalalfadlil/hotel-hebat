@@ -1,5 +1,6 @@
 import { Button, DatePicker, Flex, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table } from 'antd'
-import React, { useState } from 'react'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
 
 export const HomeTamu = () => {
     const [page, setPage] = useState('home');
@@ -25,35 +26,53 @@ export const HomeTamu = () => {
             {page === 'Fasilitas' && (<Fasilitas/>)}
             {page === 'Home' && (<Home/>)}
         </div>
+        <div className='mt-5 pt-2' style={{backgroundColor:'#E7E7E7'}}>
+                <h2>Tentang Kami</h2>
+                <p className='text-start mt-3 container pb-3'>
+                    Lepaskan diri Anda ke Hotel Hebat, dikelilingi oleh keindahan pegunungan yang indah, danau dan sawah menghijau, Nikmati
+                    sore yang hangat dengan berenang di kolam renang dengan pemandangan matahari terbenam yang memukau; Kid's Club yang luas
+                    menawarkan - beragam fasilitas dan kegiatan anak-anak yang akan melengkapi kenyamanan keluarga, Convenion Center kami, 
+                    dilengkapi pelayanan lengkap dengan ruang konvensi terbesar di Bandung, mampu mengakomodasi hingga 3.000 delegasi. Manfaatkan
+                    ruang penyelenggaraan konvensi M.I.C.E. ataupun mewujudkan acara pernikahan adat yang mewah.
+                </p>
+            </div>
     </div>
   )
 }
 const Kamar =()=>{
+    const [dataKamar, setDataKamar] = useState([])
+    const [dataFasilitas, setDataFasilitas] = useState([])
+
+    useEffect(()=>{
+        getDataKamar()
+    },[])
+    const getDataKamar = async () =>{
+        try{
+            const response = await axios.get('http://localhost:8000/api/kamar')
+            const fresponse = await axios.get('http://localhost:8000/api/fasilitas')
+            setDataKamar(response.data)
+            setDataFasilitas(fresponse.data)
+        }catch(e){
+            console.log(e)
+        }
+    }
     return(
         <div className='p-3 text-start'>
-                <KamarItem 
-                fasilitas={[
-                    'Kamar Berukuran luas 32 m2',
-                    'Kamar Mandi Shower',
-                    'Coffe Maker',
-                    'AC',
-                    'LED TV 32 inch'
-                ]} 
-                tipe='Tipe Superior'
-                gambar='./h1.jpg'
-                />
-                <KamarItem 
-                fasilitas={[
-                    'Kamar Berukuran luas 32 m2',
-                    'Kamar Mandi Shower dan Bathtub',
-                    'Coffe Maker',
-                    'Sofa',
-                    'LED TV 40 inch',
-                    'AC',
-                ]} 
-                tipe='Tipe Deluxe'
-                gambar='./h4.jpg'
-                />
+                {dataKamar.map((data, index)=>
+                    (
+                        <KamarItem 
+                        fasilitas={[
+                            'Kamar Berukuran luas 32 m2',
+                            'Kamar Mandi Shower',
+                            'Coffe Maker',
+                            'AC',
+                            'LED TV 32 inch'
+                        ]} 
+                        tipe={data.tipe}
+                        gambar='./h1.jpg'
+                        />
+                    )
+                )}
             </div>
     )
 }
@@ -76,7 +95,7 @@ const KamarItem =(props)=>{
 const Fasilitas = () =>{
     return(
         <>
-        <Image src='./h1.jpg' height={400}/>
+        <Image src='./h1.jpg' height={400} width={1100}/>
                 <Flex wrap='wrap'>
                     <h2>Fasilitas</h2>
                     <Space className='d-flex mt-2 align-items-center justify-content-center'>
@@ -92,7 +111,7 @@ const Home =()=>{
     return(
         <>
         <div className='border w-100 p3'>
-                kosong
+        <Image src='./h1.jpg' width={1000} height={400}/>
             </div>
             <Form
             className='p-3 mt-4 mb-4 d-flex justify-content-center'
