@@ -4,8 +4,9 @@ import { HomeResepsionis } from './HomeResepsionis'
 import { HomeTamu } from './HomeTamu'
 
 const HomePage = () => {
-    const userType = localStorage.getItem('user')
-
+    console.log(JSON.parse(localStorage.getItem('user')))
+    const userType = JSON.parse(localStorage.getItem('user')).tipe
+    console.log(userType)
     if (userType === 'admin'){
         return (<HomeAdmin/>)
     }else if (userType === 'resepsionis'){

@@ -1,5 +1,5 @@
 import { PlusCircleFilled, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, DatePicker, Flex, FloatButton, Form, Image, Input, Drawer, InputNumber, List, Segmented, Select, Space, Table, Upload } from 'antd'
+import { Button, DatePicker, Flex, FloatButton, Form, Image, Input, Drawer, InputNumber, List, Segmented, Select, Space, Table, Upload, message } from 'antd'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
@@ -77,6 +77,7 @@ const Kamar =()=>{
         }else {
             try{
                 const putData = {
+                    foto:`k${editData.id}.jpg`,
                     tipe:d.tipe !== undefined? d.tipe:editData.tipe,
                     jumlah:d.jumlah !== undefined? d.jumlah:editData.jumlah,
                     harga:d.harga !== undefined? d.harga:editData.harga,
@@ -98,6 +99,7 @@ const Kamar =()=>{
     };
     const openEditMode=(data)=>{
         setEditData(data)
+        console.log('edit', editData)
         showDrawer('edit')
     }
     const KamarColumn = [
@@ -132,6 +134,33 @@ const Kamar =()=>{
     useEffect(()=>{
         getKamarData();
     }, [])
+     // Mengirimkan file ke server
+  const handleUpload = (file) => {
+    // Mengubah nama file
+    const newFileName = `k${editData.id}.jpg`;
+
+    // Membuat objek FormData untuk mengirim file ke server
+    const formData = new FormData();
+    formData.append('file', file, newFileName);
+    
+    // Mengirim permintaan POST ke server
+    fetch('http://localhost:8000/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      console.log(response)
+    })
+    .then(data => {
+      console.log('File uploaded successfully:', data);
+    })
+    .catch(error => {
+      console.error('Upload error:', error);
+    });
+  };
     const getKamarData = async()=>{
         onClose()
         try{
@@ -164,6 +193,12 @@ const Kamar =()=>{
             label='Harga' name='harga'>
                 <InputNumber className='w-100' type='number' prefix='Rp.' min={0} step={50000} defaultValue={drawerMode === 'edit'? editData.harga : ''}/>
             </Form.Item>
+            {drawerMode === 'edit' && (<Upload
+            maxCount={1}
+            customRequest={({ file }) => handleUpload(file)}
+            >
+            <Button icon={<UploadOutlined />} className='w-100'>Upload Gambar</Button>
+            </Upload>)}
             <Button type='primary' className='w-100 mt-3 text-capitalize' htmlType='submit'>{drawerMode} Kamar</Button>
         </Form>
       </Drawer>
@@ -315,6 +350,15 @@ const FasilitasHotel =()=>{
         setDrawerMode(mode)
         setOpen(true);
     };
+    
+    const onClose = () => {
+        setOpen(false);
+    };
+    const openEditMode=async(data)=>{
+        showDrawer('edit')
+        setEditData(data) 
+        console.log('edit', editData)
+    }
     const [editData, setEditData] = useState({
         nama:'',
         keterangan:'',
@@ -322,6 +366,7 @@ const FasilitasHotel =()=>{
     })
     const sendData = async (d)=>{
         const dataToSend = {
+            foto:`f${editData.id}.jpg`,
             tipe:'umum',
             nama:d.nama !== undefined? d.nama:editData.nama,
             keterangan:d.keterangan !== undefined? d.keterangan:editData.keterangan
@@ -334,8 +379,10 @@ const FasilitasHotel =()=>{
                     }
                 })
                 console.log(response)
+                message.success('berhasil tambah data')
                 getFasilitasData()
            }catch(e){
+            message.error('gagal tambah data')
             console.log(e)
            }
        }else{
@@ -345,20 +392,15 @@ const FasilitasHotel =()=>{
                     'Content-Type': 'application/json'
                     }
                 })
+                message.success('berhasil edit data')
                 console.log(response)
                 getFasilitasData()
            }catch(e){
+            console.error('gagal edit data')
             console.log(e)
            }
        }
         
-    }
-    const onClose = () => {
-        setOpen(false);
-    };
-    const openEditMode=(data)=>{
-        setEditData(data)
-        showDrawer('edit')
     }
     const column = [
         {
@@ -375,7 +417,7 @@ const FasilitasHotel =()=>{
             title:'Image',
             key:'image',
             render:(source)=>(
-                <Image src={source.image} width={150}/>
+                <Image src={`http://localhost:8000/image/${source.foto}`} width={150}/>
             )
         },
         {
@@ -389,7 +431,35 @@ const FasilitasHotel =()=>{
             )
     
         }
-    ];
+    ]
+     // Mengirimkan file ke server
+  const handleUpload = (file) => {
+    // Mengubah nama file
+    const newFileName = `f${editData.id}.jpg`;
+
+    // Membuat objek FormData untuk mengirim file ke server
+    const formData = new FormData();
+    formData.append('file', file, newFileName);
+    
+    // Mengirim permintaan POST ke server
+    fetch('http://localhost:8000/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+      console.log(response)
+    })
+    .then(data => {
+      console.log('File uploaded successfully:', data);
+      getFasilitasData();
+    })
+    .catch(error => {
+      console.error('Upload error:', error);
+    });
+  };
     const data =[
         {
             nama:'Kolam Renang',
@@ -433,10 +503,12 @@ const FasilitasHotel =()=>{
             label='Nama fasilitas' name='keterangan'>
                 <Input defaultValue={drawerMode === 'edit'? editData.keterangan : ''}/>
             </Form.Item>
-            <Upload className='w-100'
-            maxCount={1}>
-                <Button icon={<UploadOutlined/>} className='w-100'>Upload Gambar</Button>
-            </Upload>
+            {drawerMode === 'edit' && (<Upload
+            maxCount={1}
+            customRequest={({ file }) => handleUpload(file)}
+            >
+            <Button icon={<UploadOutlined />} className='w-100'>Upload Gambar</Button>
+            </Upload>)}
             <Button type='primary' className='w-100 mt-3 text-capitalize' htmlType='submit'>{drawerMode} Fasilitas</Button>
         </Form>
       </Drawer>

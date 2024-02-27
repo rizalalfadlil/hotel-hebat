@@ -1,11 +1,27 @@
 import { Button, Form, Input, message } from 'antd'
+import axios from 'axios'
 import React, { useState } from 'react'
 
 const LoginPage = () => {
-    const login =(data)=>{
+    const login = async(data)=>{
         console.log(data)
-        localStorage.setItem('user', data.username)
-        message.success('login berhasil sebagai ' + localStorage.getItem('user')).then(()=>window.location.href = '/')
+        try{
+            const response = await axios.post('http://localhost:8000/api/login', data,{
+                headers: {
+                    'Content-Type': 'application/json'
+                    }
+        })
+            console.log(response)
+            localStorage.setItem('user',JSON.stringify(response.data.data))
+            message.success('login berhasil sebagai ' + response.data.data.tipe).then(()=>window.location.href = '/')
+        }catch(e){
+            console.log(e)
+        }
+    }
+    const guestMode =()=>{
+        localStorage.setItem('user',JSON.stringify({tipe:'tamu'}))
+        window.location.href = '/'
+        message.success('login berhasil sebagai tamu ').then(()=>window.location.href = '/')
     }
   return (
     <div className='d-flex align-items-center border justify-content-center'style={{height:'100vh'}}>
@@ -42,7 +58,7 @@ const LoginPage = () => {
                 </Form.Item>
                 <Button className='w-100' htmlType='submit' type='primary'>Login</Button>
             </Form>
-            <Button className='w-100 mt-3' onClick={()=>login({username:'tamu'})}>Masuk sebagai tamu</Button>
+            <Button className='w-100 mt-3' onClick={guestMode}>Masuk sebagai tamu</Button>
         </div>
     </div>
   )
