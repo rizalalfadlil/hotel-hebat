@@ -10,14 +10,18 @@ import HomePage from './pages/HomePage';
 
 function App() {
   return (
+    <>
     <div className="App">
+      <div className='d-flex justify-content-center align-items-center'style={{height:'100vh'}}>
       <BrowserRouter>
         <Routes>
           <Route exact path='/' Component={HomePage}/>
           <Route path='/login' Component={LoginPage}/>
         </Routes>
       </BrowserRouter>
+      </div>
     </div>
+    </>
   );
 }
 

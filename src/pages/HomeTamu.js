@@ -1,9 +1,11 @@
-import { Button, DatePicker, Flex, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table } from 'antd'
+import { Button, DatePicker, Flex, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table, message } from 'antd'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-
+const formatRupiah = (number) => {
+    return Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number)
+  }
 export const HomeTamu = () => {
-    const [page, setPage] = useState('home');
+    const [page, setPage] = useState('Home');
     
     const switchPage =(targetPage)=>{
         setPage(targetPage)
@@ -11,7 +13,7 @@ export const HomeTamu = () => {
     }
   return (
     <div>
-        <div className='container mt-5 p-3'>
+        <div className='container p-3 bg-light bg-opacity-75 shadow rounded'>
             <div className='row'>
                 <div className='col text-start'>
                     <h1>HOTEL HEBAT</h1>
@@ -22,11 +24,11 @@ export const HomeTamu = () => {
                     onChange={(value)=> switchPage(value)}/>
                 </div>
             </div>
+            <div className='overflow-y-scroll overflow-hidden' style={{height:'70vh'}}>
             {page === 'Kamar' && (<Kamar/>)}
             {page === 'Fasilitas' && (<Fasilitas/>)}
             {page === 'Home' && (<Home/>)}
-        </div>
-        <div className='mt-5 pt-2' style={{backgroundColor:'#E7E7E7'}}>
+            <div className='mt-5 pt-2 bg-light bg-opacity-50 rounded shadow-sm'>
                 <h2>Tentang Kami</h2>
                 <p className='text-start mt-3 container pb-3'>
                     Lepaskan diri Anda ke Hotel Hebat, dikelilingi oleh keindahan pegunungan yang indah, danau dan sawah menghijau, Nikmati
@@ -36,6 +38,9 @@ export const HomeTamu = () => {
                     ruang penyelenggaraan konvensi M.I.C.E. ataupun mewujudkan acara pernikahan adat yang mewah.
                 </p>
             </div>
+            </div>
+        </div>
+        
     </div>
   )
 }
@@ -70,6 +75,7 @@ const Kamar =()=>{
         {dataKamar.map((kamar, index) => (
         <KamarItem 
             tipe={kamar.tipe}
+            harga={kamar.harga}
             gambar={`http://localhost:8000/image/${kamar.foto}`}
             key={index} // tambahkan key prop untuk setiap iterasi dalam map
         >
@@ -85,8 +91,9 @@ const Kamar =()=>{
 const KamarItem =(props)=>{
     return(
         <>
-        <Image src={props.gambar} width={1000} height={400}/>
+        <Image src={props.gambar} width={1000} height={400} className='rounded'/>
                 <h3 className='mt-3'>{props.tipe}</h3>
+                <h5>Mulai dari : {formatRupiah(props.harga)}</h5>
                 <span className='fw-bold'>Fasilitas : </span>
                 {props.children}
                 <br/>
@@ -110,10 +117,10 @@ const Fasilitas = () =>{
     },[])
     return(
         <>
-        <Image src='./h1.jpg' height={400} width={1100}/>
+        <Image src='./h1.jpg' height={400} width={1100} className='rounded'/>
                 <Flex wrap='wrap'>
                     <h2>Fasilitas</h2>
-                    <Space className='d-flex mt-2 align-items-center justify-content-center'>
+                    <Space className='d-flex mt-2 align-items-center justify-content-center overflow-x-scroll'>
                         {gambar.map((data, index)=> data.foto && (<Image src={`http://localhost:8000/image/${data.foto}`} height={200} width={360}/>))}
                     </Space>
                 </Flex>
@@ -185,6 +192,7 @@ const Home =()=>{
                     }
                 })
                 console.log(cresponse)
+                message.success("berhasil membuat reservasi")
         }catch(e){
             console.log(e)
         }
@@ -192,8 +200,8 @@ const Home =()=>{
     const [showForm, setShowForm] = useState(false)
     return(
         <>
-        <div className='border w-100 p3'>
-        <Image src='./h1.jpg' width={1000} height={400}/>
+        <div className='w-100 p3'>
+        <Image src='./h1.jpg' width={1000} preview={false} height={400} className='rounded'/>
             </div>
             <Form
             onFinish={checkinData}
@@ -261,7 +269,7 @@ const Home =()=>{
                         className='text-start'
                         options={dataKamar}/>
                     </Form.Item>
-                <h4>total harga : {totalHarga}</h4>
+                <h4>total harga : {totalHarga > 0 ? formatRupiah(totalHarga) : '-'}</h4>
                     <Button type='primary' htmlType='submit'>Konfirmasi Pesanan</Button>
                 </Form>
             )}

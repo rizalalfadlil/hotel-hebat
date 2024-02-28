@@ -16,6 +16,7 @@ const LoginPage = () => {
             message.success('login berhasil sebagai ' + response.data.data.tipe).then(()=>window.location.href = '/')
         }catch(e){
             console.log(e)
+            message.error(e.response.data)
         }
     }
     const guestMode =()=>{
@@ -24,8 +25,7 @@ const LoginPage = () => {
         message.success('login berhasil sebagai tamu ').then(()=>window.location.href = '/')
     }
   return (
-    <div className='d-flex align-items-center border justify-content-center'style={{height:'100vh'}}>
-        <div className='border shadow container w-50 p-3 rounded'>
+    <div className='container w-50 p-5 bg-light bg-opacity-75 shadow rounded'>
             <h4 className='text-start'>
                 Login Admin
             </h4>
@@ -60,7 +60,6 @@ const LoginPage = () => {
             </Form>
             <Button className='w-100 mt-3' onClick={guestMode}>Masuk sebagai tamu</Button>
         </div>
-    </div>
   )
 }
 

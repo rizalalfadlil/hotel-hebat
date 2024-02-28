@@ -1,7 +1,35 @@
 .App {
   text-align: center;
+  background-image: url('../public/h3.jpg');
+  height:100vh;
+  color: #2c3658 !important;
+  font-family: 'nunito', sans-serif;
+}
+h1, h2, h3, h4{
+  color: #1e3992 !important;
+}
+/* width */
+::-webkit-scrollbar {
+  
+  width: 10px;
+  height: 10px;
 }
 
+/* Track */
+::-webkit-scrollbar-track {
+  background: #94cbff23;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #7789c783;
+  border-radius: 50px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #99aae279;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

@@ -1,8 +1,11 @@
 import { PlusCircleFilled, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, DatePicker, Flex, FloatButton, Form, Image, Input, Drawer, InputNumber, List, Segmented, Select, Space, Table, Upload, message } from 'antd'
+import { Button, DatePicker, Flex, FloatButton, Form, Image, Input, Drawer, InputNumber, List, Segmented, Select, Space, Table, Upload, message, Modal } from 'antd'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
+const formatRupiah = (number) => {
+    return Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number)
+  }
 
 export const HomeAdmin = () => {
     const [page, setPage] = useState('Kamar');
@@ -13,7 +16,7 @@ export const HomeAdmin = () => {
     }
   return (
     <div>
-        <div className='container mt-5 p-3'>
+        <div className='container p-5 bg-light bg-opacity-75 shadow rounded'>
             <div className='row'>
                 <div className='col text-start'>
                     <h1>HOTEL HEBAT</h1>
@@ -24,9 +27,11 @@ export const HomeAdmin = () => {
                     options={['Kamar', 'Fasilitas Kamar', 'Fasilitas Hotel']}
                     onChange={(value)=> switchPage(value)}/>
                 </div>
+                <div className='overflow-y-scroll 'style={{height:'50vh'}}>
                 {page === 'Kamar' && (<Kamar/>)}
                 {page === 'Fasilitas Kamar' && (<FasilitasKamar/>)}
                 {page === 'Fasilitas Hotel' && (<FasilitasHotel/>)}
+                </div>
             </div>
         </div>
     </div>
@@ -54,6 +59,12 @@ const Kamar =()=>{
         setDrawerMode(mode)
         setOpen(true);
     };
+    const [openModal, setOpenModal] = useState(false)
+    const modalOpen = (data) =>{
+        setOpenModal(true)
+        setEditData(data)
+    }
+    const modalClose = ()=>{setOpenModal(false)}
     const [editData, setEditData] = useState({
         tipe:'tipe',
         jumlah:'89',
@@ -71,8 +82,10 @@ const Kamar =()=>{
                   })
                 console.log(response)
                 getKamarData()
+                message.success('berhasil tambah data')
             }catch(e){
                 console.log(e)
+                message.error('gagal tambah data')
             }
         }else {
             try{
@@ -88,9 +101,11 @@ const Kamar =()=>{
                     }
                   })
                   console.log(response)
+                  message.success('berhasil edit data')
                   getKamarData()
             }catch(e){
                 console.log(e)
+                message.error('gagal edit data')
             }
         }
     }
@@ -116,7 +131,9 @@ const Kamar =()=>{
         {
             title:'Harga',
             key:'harga',
-            dataIndex:'harga'
+            render:(record)=>(
+                <p>{formatRupiah(record.harga)}</p>
+            )
         },
         {
             title:'Aksi',
@@ -124,7 +141,24 @@ const Kamar =()=>{
             render:(_, record)=>(
                 <Space>
                     <Button type='primary' onClick={()=>openEditMode(record)}>Ubah</Button>
-                    <Button>Lihat</Button>
+                    <Button onClick={()=>modalOpen(record)}>Lihat</Button>
+                    <Modal
+                    centered 
+                    open={openModal} 
+                    onCancel={modalClose}
+                    title={editData.tipe}
+                    width={800}
+                    footer={null}
+                    >
+                        <div className='row'>
+                            <Image src={`http://localhost:8000/image/${editData.foto}`} width={500} preview={false} className='rounded col'/>
+                            <div className='col'>
+                            id : {editData.id}
+                            <h5 className='mt-3'>Kamar {editData.tipe}</h5>
+                            <span>Mulai dari : {formatRupiah(editData.harga)}</span>
+                            </div>
+                        </div>
+                    </Modal>
                 </Space>
             )
     
@@ -182,14 +216,33 @@ const Kamar =()=>{
         form={form}
         layout='vertical'>
             <Form.Item
-            label='Tipe Kamar' name='tipe'>
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
+            label='Tipe Kamar' name='tipe'
+            >
                 <Input defaultValue={drawerMode === 'edit'? editData.tipe : ''}/>
             </Form.Item>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Jumlah Kamar' name='jumlah'>
                 <InputNumber type='number' className='w-100' defaultValue={drawerMode === 'edit'? editData.jumlah : ''}/>
             </Form.Item>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Harga' name='harga'>
                 <InputNumber className='w-100' type='number' prefix='Rp.' min={0} step={50000} defaultValue={drawerMode === 'edit'? editData.harga : ''}/>
             </Form.Item>
@@ -218,6 +271,12 @@ const FasilitasKamar =()=>{
         tipe:'tipe',
         kamar:'kamar',
     })
+    const [openModal, setOpenModal] = useState(false)
+    const modalOpen = (data) =>{
+        setOpenModal(true)
+        setEditData(data)
+    }
+    const modalClose = ()=>{setOpenModal(false)}
     const sendData = async (d)=>{
         const dataToSend = {
             tipe:'kamar',
@@ -231,10 +290,12 @@ const FasilitasKamar =()=>{
                     'Content-Type': 'application/json'
                     }
                 })
+                message.success('berhasil tambah data')
                 console.log(response)
                 getFasilitasData()
            }catch(e){
             console.log(e)
+            message.error('gagal tambah data')
            }
        }else{
         try{
@@ -244,9 +305,11 @@ const FasilitasKamar =()=>{
                     }
                 })
                 console.log(response)
+                message.success('berhasil edit data')
                 getFasilitasData()
            }catch(e){
             console.log(e)
+            message.error('gagal edit data')
            }
        }
         
@@ -275,7 +338,19 @@ const FasilitasKamar =()=>{
             render:(_, record)=>(
                 <Space>
                     <Button type='primary' onClick={()=>openEditMode(record)}>Ubah</Button>
-                    <Button>Lihat</Button>
+                    <Button onClick={()=>modalOpen(record)}>Lihat</Button>
+                    <Modal
+                    centered 
+                    open={openModal} 
+                    onCancel={modalClose}
+                    title='fasilitas'
+                    footer={null}
+                    >
+                        id : {editData.id}
+                        <h6 className='mt-3'>{editData.nama}</h6>
+                        <span className='text-bg-secondary rounded p-1'>{editData.tipe} / {editData.kamar}</span>
+                        <p className='mt-2'>{editData.keterangan}</p>
+                    </Modal>
                 </Space>
             )
     
@@ -328,10 +403,22 @@ const FasilitasKamar =()=>{
         onFinish={sendData}
         layout='vertical'>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Tipe Kamar' name='kamar'>
                 <Input defaultValue={drawerMode === 'edit'? editData.kamar : ''}/>
             </Form.Item>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Nama fasilitas' name='nama'>
                 <Input defaultValue={drawerMode === 'edit'? editData.nama : ''}/>
             </Form.Item>
@@ -350,7 +437,12 @@ const FasilitasHotel =()=>{
         setDrawerMode(mode)
         setOpen(true);
     };
-    
+    const [openModal, setOpenModal] = useState(false)
+    const modalOpen = (data) =>{
+        setOpenModal(true)
+        setEditData(data)
+    }
+    const modalClose = ()=>{setOpenModal(false)}
     const onClose = () => {
         setOpen(false);
     };
@@ -417,7 +509,7 @@ const FasilitasHotel =()=>{
             title:'Image',
             key:'image',
             render:(source)=>(
-                <Image src={`http://localhost:8000/image/${source.foto}`} width={150}/>
+                <Image src={`http://localhost:8000/image/${source.foto}`} className='rounded' width={150}/>
             )
         },
         {
@@ -426,7 +518,25 @@ const FasilitasHotel =()=>{
             render:(_, record)=>(
                 <Space>
                     <Button type='primary' onClick={()=>openEditMode(record)}>Ubah</Button>
-                    <Button>Lihat</Button>
+                    <Button onClick={()=>modalOpen(record)}>Lihat</Button>
+                    <Modal
+                    centered 
+                    open={openModal} 
+                    width={800}
+                    onCancel={modalClose}
+                    title='fasilitas'
+                    footer={null}
+                    >
+                        <div className='row'>
+                        <Image src={`http://localhost:8000/image/${editData.foto}`} width={500} preview={false} className='mb-2 rounded col'/>
+                        <div className='col'>
+                            id : {editData.id}
+                            <h6 className=''>{editData.nama}</h6>
+                            <span className='text-bg-secondary rounded p-1'>{editData.tipe}</span>
+                            <p className='mt-1'>{editData.keterangan}</p>
+                        </div>
+                        </div>
+                    </Modal>
                 </Space>
             )
     
@@ -496,10 +606,22 @@ const FasilitasHotel =()=>{
         onFinish={sendData}
         layout='vertical'>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Tipe Kamar' name='nama'>
                 <Input defaultValue={drawerMode === 'edit'? editData.nama : ''}/>
             </Form.Item>
             <Form.Item
+            rules={drawerMode !== 'edit' && [
+                {
+                    required:true,
+                    message:'wajib diisi'
+                }
+            ]}
             label='Nama fasilitas' name='keterangan'>
                 <Input defaultValue={drawerMode === 'edit'? editData.keterangan : ''}/>
             </Form.Item>
