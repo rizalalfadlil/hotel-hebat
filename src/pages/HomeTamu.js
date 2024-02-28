@@ -1,6 +1,12 @@
-import { Button, DatePicker, Flex, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table, message } from 'antd'
+import { Button, DatePicker, Flex, Modal, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table, message } from 'antd'
 import axios from 'axios';
+import dayjs from 'dayjs';
+import 'dayjs/locale/id';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import React, { useEffect, useState } from 'react'
+dayjs.extend(customParseFormat);
+dayjs.locale('id');
+const showedFormat = 'DD MMMM YYYY';
 const formatRupiah = (number) => {
     return Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number)
   }
@@ -24,7 +30,7 @@ export const HomeTamu = () => {
                     onChange={(value)=> switchPage(value)}/>
                 </div>
             </div>
-            <div className='overflow-y-scroll overflow-hidden' style={{height:'70vh'}}>
+            <div className='overflow-y-scroll overflow-hidden rounded' style={{height:'70vh'}}>
             {page === 'Kamar' && (<Kamar/>)}
             {page === 'Fasilitas' && (<Fasilitas/>)}
             {page === 'Home' && (<Home/>)}
@@ -168,6 +174,7 @@ const Home =()=>{
         console.log(c)
         setShowForm(true)
         setCekinForm(c)
+        
     }
     const [cekinForm, setCekinForm]=useState()
     const userData = async (u)=>{
@@ -192,14 +199,34 @@ const Home =()=>{
                     }
                 })
                 console.log(cresponse)
+                modalOpen(cresponse.data, response.data)
                 message.success("berhasil membuat reservasi")
         }catch(e){
             console.log(e)
+            message.error('tidak dapat terhubung ke server')
         }
     }
     const [showForm, setShowForm] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
+    const [modalData, setModalData] = useState({})
+    const [tamuData, setTamuData] = useState({})
+    const modalOpen = (data, tamu) =>{
+        setModalData(data)
+        setTamuData(tamu)
+        setOpenModal(true)
+        console.log(data)
+    }
+    const modalClose = ()=>{setOpenModal(false)}
     return(
         <>
+        <Modal open={openModal} width={800} onCancel={modalClose} footer={null} title='berhasil membuat check in'>
+            <h5>Bukti Reservasi</h5>
+            <span>id reservasi : <b>{modalData.id}</b></span><br/>
+            <span>nama pemesan : <b>{tamuData.nama_pemesan}</b></span><br/>
+            <span>nama tamu : <b>{tamuData.nama_tamu}</b></span><br/>
+            <span>tanggal cek in : <b>{dayjs(modalData.check_in).format(showedFormat)}</b> | cek out : <b>{dayjs(modalData.check_out).format(showedFormat)}</b></span>
+            <Button>unduh bukti</Button>
+        </Modal>
         <div className='w-100 p3'>
         <Image src='./h1.jpg' width={1000} preview={false} height={400} className='rounded'/>
             </div>
@@ -222,7 +249,7 @@ const Home =()=>{
                 <Form.Item
                 label='jumlah kamar'
                 name='jumlah'>
-                    <InputNumber min={0} onChange={gantiJumlah}/>
+                    <InputNumber min={1} onChange={gantiJumlah}/>
                 </Form.Item>
                 <Button type='default' htmlType='submit'>Pesan</Button>
             </Form>

@@ -16,7 +16,7 @@ const LoginPage = () => {
             message.success('login berhasil sebagai ' + response.data.data.tipe).then(()=>window.location.href = '/')
         }catch(e){
             console.log(e)
-            message.error(e.response.data)
+            message.error('login gagal : ',e.response.data)
         }
     }
     const guestMode =()=>{

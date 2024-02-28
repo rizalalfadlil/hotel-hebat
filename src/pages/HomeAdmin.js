@@ -27,7 +27,7 @@ export const HomeAdmin = () => {
                     options={['Kamar', 'Fasilitas Kamar', 'Fasilitas Hotel']}
                     onChange={(value)=> switchPage(value)}/>
                 </div>
-                <div className='overflow-y-scroll 'style={{height:'50vh'}}>
+                <div className='overflow-y-scroll rounded'style={{height:'50vh'}}>
                 {page === 'Kamar' && (<Kamar/>)}
                 {page === 'Fasilitas Kamar' && (<FasilitasKamar/>)}
                 {page === 'Fasilitas Hotel' && (<FasilitasHotel/>)}
