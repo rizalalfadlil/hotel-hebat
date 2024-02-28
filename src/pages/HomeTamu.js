@@ -1,9 +1,10 @@
-import { Button, DatePicker, Flex, Modal, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table, message } from 'antd'
+import { Button, DatePicker, Flex, Modal, Form, Image, Input, InputNumber, List, Segmented, Select, Space, Table, message, Alert } from 'antd'
 import axios from 'axios';
 import dayjs from 'dayjs';
+import html2canvas from 'html2canvas';
 import 'dayjs/locale/id';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 dayjs.extend(customParseFormat);
 dayjs.locale('id');
 const showedFormat = 'DD MMMM YYYY';
@@ -124,9 +125,9 @@ const Fasilitas = () =>{
     return(
         <>
         <Image src='./h1.jpg' height={400} width={1100} className='rounded'/>
-                <Flex wrap='wrap'>
                     <h2>Fasilitas</h2>
-                    <Space className='d-flex mt-2 align-items-center justify-content-center overflow-x-scroll'>
+                <Flex wrap='wrap'>
+                    <Space className='d-flex align-items-center justify-content-center overflow-x-scroll'>
                         {gambar.map((data, index)=> data.foto && (<Image src={`http://localhost:8000/image/${data.foto}`} height={200} width={360}/>))}
                     </Space>
                 </Flex>
@@ -216,16 +217,44 @@ const Home =()=>{
         setOpenModal(true)
         console.log(data)
     }
-    const modalClose = ()=>{setOpenModal(false)}
+    const modalClose = ()=>{
+        setOpenModal(false)
+        handleDownload()
+    }
+    const divRef = useRef(null);
+
+    const handleDownload = () => {
+        
+        const divElement = divRef.current;
+
+        if (!divElement) {
+            console.error('Elemen tidak ditemukan');
+            return;
+        }
+
+        html2canvas(divElement).then(canvas => {
+            const imageUrl = canvas.toDataURL();
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = 'bukti_reservasi.png'; // Nama file yang akan diunduh
+            a.click();
+        }).catch(error => {
+            console.error('Error saat merender elemen:', error);
+        });
+    };
     return(
         <>
-        <Modal open={openModal} width={800} onCancel={modalClose} footer={null} title='berhasil membuat check in'>
-            <h5>Bukti Reservasi</h5>
-            <span>id reservasi : <b>{modalData.id}</b></span><br/>
-            <span>nama pemesan : <b>{tamuData.nama_pemesan}</b></span><br/>
-            <span>nama tamu : <b>{tamuData.nama_tamu}</b></span><br/>
-            <span>tanggal cek in : <b>{dayjs(modalData.check_in).format(showedFormat)}</b> | cek out : <b>{dayjs(modalData.check_out).format(showedFormat)}</b></span>
-            <Button>unduh bukti</Button>
+        <Modal open={openModal} width={800} onCancel={modalClose} closeIcon={null} centered footer={null} title='berhasil membuat check in'>
+        <div className='text-bg-light p-2 rounded' ref={divRef}>
+                <h5>Bukti Reservasi</h5>
+                <span>id reservasi : <b>{modalData.id}</b></span><br/>
+                <span>nama pemesan : <b>{tamuData.nama_pemesan}</b></span><br/>
+                <span>nama tamu : <b>{tamuData.nama_tamu}</b></span><br/>
+                <span>tanggal cek in : <b>{dayjs(modalData.check_in).format(showedFormat)}</b> | cek out : <b>{dayjs(modalData.check_out).format(showedFormat)}</b></span><br/>
+            </div>
+            <Flex justify='space-between' className='mt-3' align='start'>
+            <Button className='mt-3 h-100' type='primary' onClick={modalClose}>Kembali</Button> <Alert type='success' message='bukti otomatis diunduh setelah keluar dari kotak ini'/>
+            </Flex>
         </Modal>
         <div className='w-100 p3'>
         <Image src='./h1.jpg' width={1000} preview={false} height={400} className='rounded'/>

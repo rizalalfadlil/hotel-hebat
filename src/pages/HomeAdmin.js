@@ -61,15 +61,12 @@ const Kamar =()=>{
     };
     const [openModal, setOpenModal] = useState(false)
     const modalOpen = (data) =>{
+        console.log(data)
         setOpenModal(true)
         setEditData(data)
     }
     const modalClose = ()=>{setOpenModal(false)}
-    const [editData, setEditData] = useState({
-        tipe:'tipe',
-        jumlah:'89',
-        harga:'100'
-    })
+    const [editData, setEditData] = useState({})
     const sendData = async (d)=>{
         console.log(drawerMode === 'tambah'? ('post',d) : ('put',editData))
 
@@ -119,6 +116,10 @@ const Kamar =()=>{
     }
     const KamarColumn = [
         {
+            key:'id',
+            
+        },
+        {
             title:'Tipe Kamar',
             key:'tipe',
             dataIndex:'tipe'
@@ -138,7 +139,7 @@ const Kamar =()=>{
         {
             title:'Aksi',
             key:'aksi',
-            render:(_, record)=>(
+            render:(record)=>(
                 <Space>
                     <Button type='primary' onClick={()=>openEditMode(record)}>Ubah</Button>
                     <Button onClick={()=>modalOpen(record)}>Lihat</Button>
